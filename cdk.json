@@ -1,0 +1,20 @@
+{
+  "app": "npx ts-node bin/app.ts",
+  "context": {
+    "dev": {
+      "account": "123456789012",
+      "region": "us-east-1",
+      "domainName": "example.com",
+      "subDomain": "dev",
+      "lambdaMemorySize": 512,
+      "lambdaTimeout": 30
+    },
+    "prod": {
+      "account": "987654321098",
+      "region": "us-east-1",
+      "domainName": "example.com",
+      "lambdaMemorySize": 1024,
+      "lambdaTimeout": 60
+    }
+  }
+}

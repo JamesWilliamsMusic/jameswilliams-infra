@@ -1,0 +1,21 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "937649c5a7364e52bb82a0a02b5fa0051bd94af0837f9d0bbe15ba659c686cf6": {
+      "displayName": "Prod-InfraStack Template",
+      "source": {
+        "path": "MusicPortfolioPipelineProdInfraStack4E6726EF.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "987654321098-us-east-1-1ab15bb1": {
+          "bucketName": "cdk-hnb659fds-assets-987654321098-us-east-1",
+          "objectKey": "937649c5a7364e52bb82a0a02b5fa0051bd94af0837f9d0bbe15ba659c686cf6.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::987654321098:role/cdk-hnb659fds-file-publishing-role-987654321098-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

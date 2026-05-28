@@ -1,0 +1,325 @@
+{
+  "/MusicPortfolioPipeline": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline": [
+    {
+      "type": "aws:cdk:warning",
+      "data": "V1 pipeline type is implicitly selected when `pipelineType` is not set. If you want to use V2 type, set `PipelineType.V2`. [ack: @aws-cdk/aws-codepipeline:unspecifiedPipelineType]",
+      "trace": [
+        "Annotations.addMessage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2399)",
+        "Annotations.addWarningV2 (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1087)",
+        "CodePipeline.doBuildPipeline (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/pipelines/lib/codepipeline/codepipeline.js:1:6843)",
+        "CodePipeline.buildPipeline (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/pipelines/lib/main/pipeline-base.js:1:3044)",
+        "CodePipeline.buildJustInTime (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/pipelines/lib/main/pipeline-base.js:1:3111)",
+        "Object.visit (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/pipelines/lib/main/pipeline-base.js:1:1780)",
+        "recurse (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:4901)",
+        "recurse (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:5136)",
+        "recurse (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:5136)",
+        "invokeAspectsV2 (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:3406)",
+        "synthesize (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:1:2382)",
+        "App.synth (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/aws-cdk-lib/core/lib/stage.js:1:3594)",
+        "Object.<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:43:5)",
+        "Module._compile (node:internal/modules/cjs/loader:1830:14)",
+        "Module.m._compile (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/ts-node/src/index.ts:1618:23)",
+        "node:internal/modules/cjs/loader:1961:10",
+        "Object.require.extensions.<computed> [as .ts] (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/ts-node/src/index.ts:1621:12)",
+        "Module.load (node:internal/modules/cjs/loader:1553:32)",
+        "Module._load (node:internal/modules/cjs/loader:1355:12)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:255:19)",
+        "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+        "phase4 (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/ts-node/src/bin.ts:649:14)",
+        "bootstrap (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/ts-node/src/bin.ts:95:10)",
+        "main (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/ts-node/src/bin.ts:55:10)",
+        "Object.<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/node_modules/ts-node/src/bin.ts:800:3)",
+        "Module._compile (node:internal/modules/cjs/loader:1830:14)",
+        "Object.<anonymous> (node:internal/modules/cjs/loader:1961:10)",
+        "Module.load (node:internal/modules/cjs/loader:1553:32)",
+        "Module._load (node:internal/modules/cjs/loader:1355:12)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:255:19)",
+        "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+        "node:internal/main/run_main_module:33:47"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:43:5)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:43:5)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in aws-cdk-lib...",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:43:5)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Pipeline9850B417"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/CodeBuildActionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineCodeBuildActionRole226DB0CB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/ArtifactsBucketEncryptionKey/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineArtifactsBucketEncryptionKeyF5BF0670"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/ArtifactsBucketEncryptionKeyAlias/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineArtifactsBucketEncryptionKeyAlias94A07392"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/ArtifactsBucket/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineArtifactsBucketAEA9A052"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineRoleB27FAA37"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/CodeBuildActionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineCodeBuildActionRoleDefaultPolicy1D62A6FE"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/UpdatePipeline/SelfMutation/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineUpdatePipelineSelfMutationDAA41400"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/ArtifactsBucket/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineArtifactsBucketPolicyF53CCC52"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineRoleDefaultPolicy7BDC1ABB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/UpdatePipeline/SelfMutation/Role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineUpdatePipelineSelfMutationRole57E559E8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Source/owner_music-portfolio-infra/CodePipelineActionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineSourceownermusicportfolioinfraCodePipelineActionRole332FCF82"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Build/Synth/CdkBuildProject/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineBuildSynthCdkBuildProject6BEFA8E6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Prod/PromoteToProd/CodePipelineActionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineProdPromoteToProdCodePipelineActionRole08AAED6C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/UpdatePipeline/SelfMutation/Role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineUpdatePipelineSelfMutationRoleDefaultPolicyA225DA4E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Source/owner_music-portfolio-infra/CodePipelineActionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineSourceownermusicportfolioinfraCodePipelineActionRoleDefaultPolicy7484E1AC"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Build/Synth/CdkBuildProject/Role/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineBuildSynthCdkBuildProjectRole231EEA2A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Pipeline/Pipeline/Build/Synth/CdkBuildProject/Role/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "PipelineBuildSynthCdkBuildProjectRoleDefaultPolicyFB6C941C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ]
+}

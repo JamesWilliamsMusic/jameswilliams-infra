@@ -1,0 +1,285 @@
+{
+  "/MusicPortfolioPipeline/Dev/InfraStack": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/AWSCloudFrontPartitionHostedZoneIdMap": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AWSCloudFrontPartitionHostedZoneIdMap"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new ARecord2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:128:5)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/EcrRepository/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrRepository4D7B3EE1"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Repository2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:36:23)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/LambdaExecutionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LambdaExecutionRoleD5C26073"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Role2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:49:24)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/LambdaFunction/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LambdaFunctionBF21E41F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new DockerImageFunction2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:58:27)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/LambdaFunction/invoke-function-url": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LambdaFunctioninvokefunctionurlFF7F71DF"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addFunctionUrl in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:67:45)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/LambdaFunction/invoke-function": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LambdaFunctioninvokefunctionE71E7FDB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addFunctionUrl in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:67:45)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/HostedZone/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HostedZoneDB99F866"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new HostedZone2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:72:23)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/Certificate/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Certificate4E7ABB08"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Certificate2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:93:26)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/Distribution/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "Distribution830FAC52"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Distribution2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:114:25)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/AliasRecord/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AliasRecord851000D2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new ARecord2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:128:5)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/UserPool/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPool6BA7E5F2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new UserPool2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:137:21)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/UserPoolClient/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPoolClient2F5918F7"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new UserPoolClient2 in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:149:5)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node, ts-node..."
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/LambdaExecutionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LambdaExecutionRoleDefaultPolicy6D69732F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.grantPull in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:56:21)"
+      ]
+    }
+  ],
+  "/MusicPortfolioPipeline/Dev/InfraStack/LambdaFunction/FunctionUrl/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "LambdaFunctionFunctionUrl129D3652"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.addFunctionUrl in aws-cdk-lib...",
+        "new InfraStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/infra-stack.ts:67:45)",
+        "new InfraStage (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:18:5)",
+        "new PipelineStack (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/lib/pipeline-stack.ts:52:7)",
+        "<anonymous> (/Users/joonopohrchakma/JamesWilliams/jameswilliams-infra/jameswilliams-infra/bin/app.ts:21:3)",
+        "...node internals, ts-node..."
+      ]
+    }
+  ]
+}

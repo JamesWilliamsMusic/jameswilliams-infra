@@ -1,0 +1,21 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "1d83a874d8411cc2bf852219151ab8b5f85b1ea9831ca953f3245badfd806c56": {
+      "displayName": "dev-music-portfolio Template",
+      "source": {
+        "path": "dev-music-portfolio.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "123456789012-us-east-1-d5fa821e": {
+          "bucketName": "cdk-hnb659fds-assets-123456789012-us-east-1",
+          "objectKey": "1d83a874d8411cc2bf852219151ab8b5f85b1ea9831ca953f3245badfd806c56.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::123456789012:role/cdk-hnb659fds-file-publishing-role-123456789012-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

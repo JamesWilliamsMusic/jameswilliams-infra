@@ -1,0 +1,53 @@
+digraph G {
+  # Arrows represent an "unlocks" relationship (opposite of dependency). So chosen
+  # because the layout looks more natural that way.
+  # To represent subgraph dependencies, subgraphs are represented by BEGIN/END nodes.
+  # To render: `dot -Tsvg MusicPortfolioPipelineB2E90439.dot > graph.svg`, open in a browser.
+  node [shape="box"];
+"BEGIN Build" [shape="cds", style="filled", fillcolor="#b7deff"];
+"END Build" [shape="cds", style="filled", fillcolor="#b7deff"];
+"Build.Synth";
+"Source.owner/music-portfolio-infra" -> "Build.Synth";
+"BEGIN Build" -> "Build.Synth";
+"Build.Synth" -> "END Build";
+"BEGIN UpdatePipeline" [shape="cds", style="filled", fillcolor="#b7deff"];
+"END UpdatePipeline" [shape="cds", style="filled", fillcolor="#b7deff"];
+"UpdatePipeline.SelfMutate";
+"Build.Synth" -> "UpdatePipeline.SelfMutate";
+"BEGIN UpdatePipeline" -> "UpdatePipeline.SelfMutate";
+"UpdatePipeline.SelfMutate" -> "END UpdatePipeline";
+"BEGIN Dev" [shape="cds", style="filled", fillcolor="#b7deff"];
+"END Dev" [shape="cds", style="filled", fillcolor="#b7deff"];
+"UpdatePipeline.SelfMutate" -> "BEGIN Dev";
+"BEGIN Dev.InfraStack" [shape="cds", style="filled", fillcolor="#b7deff"];
+"END Dev.InfraStack" [shape="cds", style="filled", fillcolor="#b7deff"];
+"Dev.InfraStack.Deploy";
+"Dev.InfraStack.Prepare" -> "Dev.InfraStack.Deploy";
+"Dev.InfraStack.Prepare";
+"Build.Synth" -> "Dev.InfraStack.Prepare";
+"BEGIN Dev.InfraStack" -> "Dev.InfraStack.Prepare";
+"Dev.InfraStack.Deploy" -> "END Dev.InfraStack";
+"BEGIN Dev" -> "BEGIN Dev.InfraStack";
+"END Dev.InfraStack" -> "END Dev";
+"BEGIN Prod" [shape="cds", style="filled", fillcolor="#b7deff"];
+"END Prod" [shape="cds", style="filled", fillcolor="#b7deff"];
+"UpdatePipeline.SelfMutate" -> "BEGIN Prod";
+"END Dev" -> "BEGIN Prod";
+"BEGIN Prod.InfraStack" [shape="cds", style="filled", fillcolor="#b7deff"];
+"END Prod.InfraStack" [shape="cds", style="filled", fillcolor="#b7deff"];
+"Prod.PromoteToProd" -> "BEGIN Prod.InfraStack";
+"Prod.InfraStack.Deploy";
+"Prod.InfraStack.Prepare" -> "Prod.InfraStack.Deploy";
+"Prod.InfraStack.Prepare";
+"Build.Synth" -> "Prod.InfraStack.Prepare";
+"BEGIN Prod.InfraStack" -> "Prod.InfraStack.Prepare";
+"Prod.InfraStack.Deploy" -> "END Prod.InfraStack";
+"Prod.PromoteToProd";
+"BEGIN Prod" -> "Prod.PromoteToProd";
+"END Prod.InfraStack" -> "END Prod";
+"BEGIN Source" [shape="cds", style="filled", fillcolor="#b7deff"];
+"END Source" [shape="cds", style="filled", fillcolor="#b7deff"];
+"Source.owner/music-portfolio-infra";
+"BEGIN Source" -> "Source.owner/music-portfolio-infra";
+"Source.owner/music-portfolio-infra" -> "END Source";
+}

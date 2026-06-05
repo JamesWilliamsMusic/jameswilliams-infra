@@ -1,6 +1,8 @@
 # Music Portfolio Infrastructure
 
-AWS CDK infrastructure for a music portfolio site. Provisions cloud resources for a containerized application with environment separation (dev/prod) and multi-account deployment support.
+AWS CDK infrastructure for a music portfolio site. This is the **infra** repo in a microservice architecture alongside frontend, api, and webiny repos.
+
+Provisions cloud resources for a containerized application with environment separation (dev/prod) and multi-account deployment support.
 
 ## Architecture
 
@@ -8,26 +10,29 @@ AWS CDK infrastructure for a music portfolio site. Provisions cloud resources fo
 CloudFront Distribution (CDN + HTTPS)
         │
         ▼
-Lambda Function (Docker image)
+API Gateway (HTTP API)
         │
         ▼
-ECR Repository (container images)
-
-Route 53 ─── ACM Certificate (TLS)
-Cognito User Pool (authentication)
+Lambda Function (Docker image from ECR)
 ```
+
+Supporting services:
+
+- **Route 53** — DNS hosted zone and alias records pointing to CloudFront
+- **ACM** — SSL/TLS certificate (us-east-1) with DNS validation via Route 53
+- **Cognito** — User pool for authentication with password policy enforcement
 
 ### AWS Services
 
 | Service | Purpose |
 |---------|---------|
-| ECR | Stores Docker container images with lifecycle policy (retains 10 most recent) |
-| Lambda | Runs the application as a Docker container |
 | CloudFront | CDN with HTTPS termination and custom domain |
-| Route 53 | DNS hosted zone and alias records pointing to CloudFront |
-| ACM | SSL/TLS certificate with DNS validation (us-east-1) |
-| Cognito | User authentication with password policy enforcement |
-| CodePipeline | CI/CD pipeline with auto-deploy to dev and manual approval for prod |
+| API Gateway | HTTP API routing all requests to Lambda |
+| Lambda | Runs the application as a Docker container |
+| ECR | Stores Docker container images (retains 10 most recent) |
+| Route 53 | DNS hosted zone and alias records |
+| ACM | TLS certificate with DNS validation |
+| Cognito | User authentication (min 8 char password policy) |
 
 ### Resource Naming
 
@@ -35,6 +40,7 @@ Resources use an environment prefix to avoid collisions:
 
 - ECR: `{env}-music-portfolio`
 - Lambda: `{env}-music-portfolio-fn`
+- API Gateway: `{env}-music-portfolio-api`
 - Cognito: `{env}-music-portfolio-users`
 
 ## Prerequisites
@@ -42,9 +48,8 @@ Resources use an environment prefix to avoid collisions:
 - Node.js 18+
 - AWS CDK CLI (`npm install -g aws-cdk`)
 - AWS credentials configured for the target account
-- Docker (for Lambda container image builds)
 
-## Configuration
+## Configuring Target AWS Accounts
 
 Environment configuration lives in `cdk.json` under the `context` key. Update the account and region values for your target AWS accounts:
 
@@ -70,6 +75,8 @@ Environment configuration lives in `cdk.json` under the `context` key. Update th
 }
 ```
 
+To deploy to a different AWS account (e.g., James Williams' account), update the `account` field with the target account ID. No code changes are needed — the stack is fully parameterized.
+
 ### Configuration Fields
 
 | Field | Description |
@@ -83,48 +90,47 @@ Environment configuration lives in `cdk.json` under the `context` key. Update th
 
 ## Deployment
 
-### Install Dependencies
+### CI/CD (GitHub Actions)
+
+| Workflow | Trigger | Environment |
+|----------|---------|-------------|
+| `deploy-dev.yml` | Push to `main` | dev |
+| `deploy-prod.yml` | Manual dispatch | prod |
+
+Both workflows run: install → test → `cdk synth` → `cdk diff` → `cdk deploy`.
+
+**Required GitHub Secrets:**
+
+- Dev: `AWS_ROLE_ARN`, `AWS_REGION`
+- Prod: `PROD_AWS_ROLE_ARN`, `PROD_AWS_REGION`
+
+Authentication uses OIDC (GitHub's `id-token: write` permission).
+
+### Manual Deployment
 
 ```bash
-npm install
+# Install dependencies
+npm ci
+
+# Deploy to dev
+npx cdk deploy --context env=dev
+
+# Deploy to prod
+npx cdk deploy --context env=prod
 ```
 
-### Synthesize Stacks
+### Synthesize Stacks Locally
 
 ```bash
-# Synthesize dev stack
-npx cdk synth -c deploy=dev
+# Synthesize dev stack (generates CloudFormation template)
+npx cdk synth --context env=dev
 
 # Synthesize prod stack
-npx cdk synth -c deploy=prod
+npx cdk synth --context env=prod
 
-# Synthesize pipeline stack
-npx cdk synth -c deploy=pipeline -c connectionArn=YOUR_CODESTAR_CONNECTION_ARN
+# View diff before deploying
+npx cdk diff --context env=dev
 ```
-
-### Deploy Individual Environments
-
-```bash
-# Deploy dev
-npx cdk deploy -c deploy=dev
-
-# Deploy prod
-npx cdk deploy -c deploy=prod
-```
-
-### Deploy via CI/CD Pipeline
-
-```bash
-npx cdk deploy -c deploy=pipeline \
-  -c connectionArn=arn:aws:codestar-connections:REGION:ACCOUNT:connection/ID \
-  -c repoOwner=your-github-org \
-  -c repoName=music-portfolio-infra \
-  -c branch=main
-```
-
-Once deployed, the pipeline automatically:
-1. Deploys to dev on every push to main
-2. Requires manual approval before deploying to prod
 
 ## Testing
 
@@ -148,8 +154,21 @@ npx jest test/property
 
 ```
 bin/app.ts              CDK app entry point
-lib/config.ts           Environment and pipeline configuration interfaces
-lib/infra-stack.ts      Infrastructure stack (ECR, Lambda, CloudFront, Route 53, ACM, Cognito)
-lib/pipeline-stack.ts   CI/CD pipeline stack (CodePipeline with dev/prod stages)
+lib/config.ts           Environment configuration interface and loader
+lib/infra-stack.ts      Infrastructure stack (all AWS resources)
+.github/workflows/      CI/CD workflows (dev + prod)
+test/unit/              Unit tests (CDK assertions)
+test/property/          Property-based tests (fast-check)
 cdk.json                CDK app config and environment context
 ```
+
+## Microservice Architecture
+
+This repo is one part of a multi-repo architecture:
+
+| Repo | Purpose |
+|------|---------|
+| **infra** (this repo) | AWS CDK infrastructure provisioning |
+| **frontend** | Client-side application |
+| **api** | Backend API service |
+| **webiny** | CMS (Webiny) |

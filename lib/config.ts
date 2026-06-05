@@ -10,15 +10,6 @@ export interface EnvironmentConfig {
   lambdaTimeout: number;
 }
 
-export interface PipelineConfig {
-  repoOwner: string;
-  repoName: string;
-  branch: string;
-  connectionArn: string;
-  devConfig: EnvironmentConfig;
-  prodConfig: EnvironmentConfig;
-}
-
 /**
  * Load environment configuration from CDK context.
  * Throws a descriptive error if required values are missing.

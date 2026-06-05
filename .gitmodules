@@ -1,0 +1,3 @@
+[submodule ".kiro/skills/shared"]
+	path = .kiro/skills/shared
+	url = https://github.com/joonochakma/claude-skills

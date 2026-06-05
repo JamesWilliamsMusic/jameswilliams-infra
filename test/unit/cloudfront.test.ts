@@ -38,6 +38,29 @@ describe('CloudFront Distribution', () => {
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
   });
 
+  test('API Gateway is configured as origin (not Lambda directly)', () => {
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        Origins: [
+          Match.objectLike({
+            CustomOriginConfig: {
+              OriginProtocolPolicy: 'https-only',
+            },
+            OriginPath: '/dev',
+          }),
+        ],
+      },
+    });
+
+    // Verify origin domain references execute-api (API Gateway), not Lambda
+    const resources = template.findResources('AWS::CloudFront::Distribution');
+    const distConfig = Object.values(resources)[0];
+    const origin = distConfig.Properties.DistributionConfig.Origins[0];
+    const domainParts = origin.DomainName['Fn::Join'][1];
+    const domainSuffix = domainParts[1] as string;
+    expect(domainSuffix).toContain('.execute-api.');
+  });
+
   test('ACM certificate is attached', () => {
     template.hasResourceProperties('AWS::CloudFront::Distribution', {
       DistributionConfig: {

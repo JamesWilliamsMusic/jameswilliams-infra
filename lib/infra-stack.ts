@@ -2,6 +2,8 @@ import * as cdk from 'aws-cdk-lib';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as apigw from 'aws-cdk-lib/aws-apigatewayv2';
+import * as apigwIntegrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as route53 from 'aws-cdk-lib/aws-route53';
@@ -18,6 +20,7 @@ export interface InfraStackProps extends cdk.StackProps {
 export class InfraStack extends cdk.Stack {
   public readonly repository: ecr.Repository;
   public readonly lambdaFunction: lambda.DockerImageFunction;
+  public readonly httpApi: apigw.HttpApi;
   public readonly distribution: cloudfront.Distribution;
   public readonly hostedZone: route53.HostedZone;
   public readonly certificate: acm.ICertificate;
@@ -63,9 +66,21 @@ export class InfraStack extends cdk.Stack {
       role: lambdaRole,
     });
 
-    // Add a function URL for CloudFront origin
-    const functionUrl = this.lambdaFunction.addFunctionUrl({
-      authType: lambda.FunctionUrlAuthType.NONE,
+    // --- API Gateway HTTP API ---
+    const lambdaIntegration = new apigwIntegrations.HttpLambdaIntegration(
+      'LambdaIntegration',
+      this.lambdaFunction
+    );
+
+    this.httpApi = new apigw.HttpApi(this, 'HttpApi', {
+      apiName: `${prefix}-api`,
+      defaultIntegration: lambdaIntegration,
+      createDefaultStage: false,
+    });
+
+    this.httpApi.addStage('EnvironmentStage', {
+      stageName: config.envName,
+      autoDeploy: true,
     });
 
     // --- Route 53 Hosted Zone ---
@@ -74,11 +89,6 @@ export class InfraStack extends cdk.Stack {
     });
 
     // --- ACM Certificate (must be in us-east-1 for CloudFront) ---
-    // When the stack region is us-east-1, the certificate is created directly.
-    // When the stack region differs, crossRegionReferences is enabled on the stack
-    // and a separate certificate stack is created in us-east-1 automatically by CDK
-    // when using CDK Pipelines. For standalone deployment in a non-us-east-1 region,
-    // a dedicated certificate stack in us-east-1 would be required.
     const certificateDomainName = config.subDomain
       ? `${config.subDomain}.${config.domainName}`
       : config.domainName;
@@ -88,16 +98,12 @@ export class InfraStack extends cdk.Stack {
       : [`www.${config.domainName}`];
 
     if (this.region === 'us-east-1' || cdk.Token.isUnresolved(this.region)) {
-      // Stack is in us-east-1 or region is a token (resolved at deploy time) —
-      // create the certificate directly in this stack.
       this.certificate = new acm.Certificate(this, 'Certificate', {
         domainName: certificateDomainName,
         subjectAlternativeNames: certificateSubjectAlternativeNames,
         validation: acm.CertificateValidation.fromDns(this.hostedZone),
       });
     } else {
-      // Stack is in a different region — create a cross-region certificate
-      // using DnsValidatedCertificate which provisions in us-east-1.
       this.certificate = new acm.DnsValidatedCertificate(this, 'Certificate', {
         domainName: certificateDomainName,
         subjectAlternativeNames: certificateSubjectAlternativeNames,
@@ -111,10 +117,18 @@ export class InfraStack extends cdk.Stack {
       ? [`${config.subDomain}.${config.domainName}`]
       : [config.domainName, `www.${config.domainName}`];
 
+    // Use API Gateway HTTP API as the origin for CloudFront
+    const apiEndpointDomain = `${this.httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`;
+
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
-        origin: new origins.FunctionUrlOrigin(functionUrl),
+        origin: new origins.HttpOrigin(apiEndpointDomain, {
+          originPath: `/${config.envName}`,
+        }),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+        cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+        originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       },
       domainNames,
       certificate: this.certificate,

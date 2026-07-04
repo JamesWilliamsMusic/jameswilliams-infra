@@ -6,10 +6,8 @@ import * as apigw from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigwIntegrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
-import * as route53 from 'aws-cdk-lib/aws-route53';
-import * as targets from 'aws-cdk-lib/aws-route53-targets';
-import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as path from 'path';
 import { Construct } from 'constructs';
 import { EnvironmentConfig } from './config';
 
@@ -22,20 +20,15 @@ export class InfraStack extends cdk.Stack {
   public readonly lambdaFunction: lambda.DockerImageFunction;
   public readonly httpApi: apigw.HttpApi;
   public readonly distribution: cloudfront.Distribution;
-  public readonly hostedZone: route53.HostedZone;
-  public readonly certificate: acm.ICertificate;
   public readonly userPool: cognito.UserPool;
 
   constructor(scope: Construct, id: string, props: InfraStackProps) {
-    super(scope, id, {
-      ...props,
-      crossRegionReferences: true,
-    });
+    super(scope, id, props);
 
     const { config } = props;
     const prefix = `${config.envName}-music-portfolio`;
 
-    // --- ECR Repository ---
+    // --- ECR Repository (for CI pushes) ---
     this.repository = new ecr.Repository(this, 'EcrRepository', {
       repositoryName: prefix,
       imageScanOnPush: true,
@@ -48,7 +41,19 @@ export class InfraStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    // Grant Lambda service pull access on the ECR repo
+    this.repository.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ServicePrincipal('lambda.amazonaws.com')],
+      actions: [
+        'ecr:GetDownloadUrlForLayer',
+        'ecr:BatchGetImage',
+      ],
+    }));
+
     // --- Lambda Function ---
+    // Uses a placeholder image built from ./placeholder/ on first deploy.
+    // CI will update the function code to the real app image later.
     const lambdaRole = new iam.Role(this, 'LambdaExecutionRole', {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
@@ -56,14 +61,31 @@ export class InfraStack extends cdk.Stack {
       ],
     });
 
-    this.repository.grantPull(lambdaRole);
+    // Allow the Lambda role to pull images from ECR
+    lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'ecr:GetDownloadUrlForLayer',
+        'ecr:BatchGetImage',
+        'ecr:GetAuthorizationToken',
+      ],
+      resources: ['*'],
+    }));
 
     this.lambdaFunction = new lambda.DockerImageFunction(this, 'LambdaFunction', {
       functionName: `${prefix}-fn`,
-      code: lambda.DockerImageCode.fromEcr(this.repository),
+      code: lambda.DockerImageCode.fromImageAsset(
+        path.join(__dirname, '..', 'placeholder'),
+        { platform: cdk.aws_ecr_assets.Platform.LINUX_AMD64 }
+      ),
       memorySize: config.lambdaMemorySize,
       timeout: cdk.Duration.seconds(config.lambdaTimeout),
       role: lambdaRole,
+      environment: {
+        NODE_ENV: config.envName === 'prod' ? 'production' : 'development',
+        WEBINY_API_URL: '',
+        WEBINY_API_TOKEN: '',
+      },
     });
 
     // --- API Gateway HTTP API ---
@@ -83,41 +105,7 @@ export class InfraStack extends cdk.Stack {
       autoDeploy: true,
     });
 
-    // --- Route 53 Hosted Zone ---
-    this.hostedZone = new route53.HostedZone(this, 'HostedZone', {
-      zoneName: config.domainName,
-    });
-
-    // --- ACM Certificate (must be in us-east-1 for CloudFront) ---
-    const certificateDomainName = config.subDomain
-      ? `${config.subDomain}.${config.domainName}`
-      : config.domainName;
-
-    const certificateSubjectAlternativeNames = config.subDomain
-      ? undefined
-      : [`www.${config.domainName}`];
-
-    if (this.region === 'us-east-1' || cdk.Token.isUnresolved(this.region)) {
-      this.certificate = new acm.Certificate(this, 'Certificate', {
-        domainName: certificateDomainName,
-        subjectAlternativeNames: certificateSubjectAlternativeNames,
-        validation: acm.CertificateValidation.fromDns(this.hostedZone),
-      });
-    } else {
-      this.certificate = new acm.DnsValidatedCertificate(this, 'Certificate', {
-        domainName: certificateDomainName,
-        subjectAlternativeNames: certificateSubjectAlternativeNames,
-        hostedZone: this.hostedZone,
-        region: 'us-east-1',
-      });
-    }
-
-    // --- CloudFront Distribution ---
-    const domainNames = config.subDomain
-      ? [`${config.subDomain}.${config.domainName}`]
-      : [config.domainName, `www.${config.domainName}`];
-
-    // Use API Gateway HTTP API as the origin for CloudFront
+    // --- CloudFront Distribution (no custom domain for now) ---
     const apiEndpointDomain = `${this.httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`;
 
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
@@ -130,21 +118,7 @@ export class InfraStack extends cdk.Stack {
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       },
-      domainNames,
-      certificate: this.certificate,
-    });
-
-    // --- Route 53 DNS Records ---
-    const recordName = config.subDomain
-      ? `${config.subDomain}.${config.domainName}`
-      : config.domainName;
-
-    new route53.ARecord(this, 'AliasRecord', {
-      zone: this.hostedZone,
-      recordName,
-      target: route53.RecordTarget.fromAlias(
-        new targets.CloudFrontTarget(this.distribution)
-      ),
+      comment: `${prefix} distribution`,
     });
 
     // --- Cognito User Pool ---
@@ -166,6 +140,27 @@ export class InfraStack extends cdk.Stack {
       authFlows: {
         userSrp: true,
       },
+    });
+
+    // --- Outputs ---
+    new cdk.CfnOutput(this, 'CloudFrontUrl', {
+      value: `https://${this.distribution.distributionDomainName}`,
+      description: 'CloudFront distribution URL',
+    });
+
+    new cdk.CfnOutput(this, 'ApiGatewayUrl', {
+      value: `https://${apiEndpointDomain}/${config.envName}`,
+      description: 'API Gateway endpoint URL',
+    });
+
+    new cdk.CfnOutput(this, 'LambdaFunctionName', {
+      value: this.lambdaFunction.functionName,
+      description: 'Lambda function name (use in web app CI)',
+    });
+
+    new cdk.CfnOutput(this, 'EcrRepositoryUri', {
+      value: this.repository.repositoryUri,
+      description: 'ECR repository URI (use in web app CI)',
     });
   }
 }

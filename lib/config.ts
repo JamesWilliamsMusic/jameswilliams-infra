@@ -4,7 +4,7 @@ export interface EnvironmentConfig {
   envName: 'dev' | 'prod';
   account: string;
   region: string;
-  domainName: string;
+  domainName?: string;
   subDomain?: string;
   lambdaMemorySize: number;
   lambdaTimeout: number;
@@ -24,10 +24,9 @@ export function loadEnvironmentConfig(app: App, envName: 'dev' | 'prod'): Enviro
     );
   }
 
-  const requiredFields: (keyof Omit<EnvironmentConfig, 'envName' | 'subDomain'>)[] = [
+  const requiredFields: (keyof Omit<EnvironmentConfig, 'envName' | 'subDomain' | 'domainName'>)[] = [
     'account',
     'region',
-    'domainName',
     'lambdaMemorySize',
     'lambdaTimeout',
   ];

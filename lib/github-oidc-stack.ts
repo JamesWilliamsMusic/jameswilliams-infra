@@ -10,7 +10,6 @@ export interface GitHubOidcStackProps extends cdk.StackProps {
 
   /**
    * Optional: additional repos that can assume this role
-   * (e.g., ["joonochakma/jameswilliams-web", "joonochakma/jameswilliams-api"])
    */
   additionalRepos?: string[];
 }
@@ -25,17 +24,17 @@ export class GitHubOidcStack extends cdk.Stack {
     const { githubRepo, additionalRepos = [] } = props;
     const allRepos = [githubRepo, ...additionalRepos];
 
-    // Import the existing OIDC provider (already created in this account)
-    this.oidcProvider = iam.OpenIdConnectProvider.fromOpenIdConnectProviderArn(
-      this,
-      'GitHubOidcProvider',
-      `arn:aws:iam::${this.account}:oidc-provider/token.actions.githubusercontent.com`
-    );
+    // Create the GitHub OIDC provider in this account
+    this.oidcProvider = new iam.OpenIdConnectProvider(this, 'GitHubOidcProvider', {
+      url: 'https://token.actions.githubusercontent.com',
+      clientIds: ['sts.amazonaws.com'],
+      thumbprints: ['6938fd4d98bab03faadb97b34396831e3780aea1'],
+    });
 
-    // Build the trust condition: allow all specified repos, any branch
+    // Trust condition: allow all specified repos, any branch
     const repoConditions = allRepos.map((repo) => `repo:${repo}:*`);
 
-    // Create the IAM role that GitHub Actions will assume
+    // IAM role that GitHub Actions will assume for CDK deployments
     this.deployRole = new iam.Role(this, 'GitHubActionsDeployRole', {
       roleName: 'github-actions-deploy',
       assumedBy: new iam.WebIdentityPrincipal(
@@ -53,8 +52,7 @@ export class GitHubOidcStack extends cdk.Stack {
       maxSessionDuration: cdk.Duration.hours(1),
     });
 
-    // Grant CDK deployment permissions
-    // Using AdministratorAccess for now — scope down once you know exactly what CDK needs
+    // AdministratorAccess for CDK deployments — scope down later
     this.deployRole.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess')
     );
@@ -65,7 +63,7 @@ export class GitHubOidcStack extends cdk.Stack {
       exportName: 'GitHubActionsDeployRoleArn',
     });
 
-    // --- Web Repo Role (scoped to ECR push only) ---
+    // --- Web Repo Role (scoped to ECR push + Lambda update + SSM read) ---
     const webRole = new iam.Role(this, 'GitHubActionsWebRole', {
       roleName: 'github-actions-jameswilliams-web',
       assumedBy: new iam.WebIdentityPrincipal(
@@ -79,7 +77,7 @@ export class GitHubOidcStack extends cdk.Stack {
           },
         }
       ),
-      description: 'Role assumed by jameswilliams-web for ECR push and Lambda update',
+      description: 'Role assumed by jameswilliams-web for ECR push, Lambda update, and SSM read',
       maxSessionDuration: cdk.Duration.hours(1),
     });
 
@@ -105,6 +103,18 @@ export class GitHubOidcStack extends cdk.Stack {
         'lambda:GetFunction',
       ],
       resources: ['*'],
+    }));
+
+    webRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'ssm:GetParameter',
+        'ssm:GetParameters',
+        'ssm:GetParametersByPath',
+      ],
+      resources: [
+        `arn:aws:ssm:${this.region}:${this.account}:parameter/jameswilliams/*`,
+      ],
     }));
 
     new cdk.CfnOutput(this, 'WebRoleArn', {

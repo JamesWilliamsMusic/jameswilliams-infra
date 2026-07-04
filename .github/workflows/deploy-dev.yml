@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -35,11 +35,5 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: CDK Synth
-        run: npx cdk synth --context env=dev
-
-      - name: CDK Diff
-        run: npx cdk diff --context env=dev
-
       - name: CDK Deploy
-        run: npx cdk deploy --context env=dev --require-approval never
+        run: npx cdk deploy --all --context env=dev --require-approval never

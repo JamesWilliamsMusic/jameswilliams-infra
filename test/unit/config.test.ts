@@ -27,13 +27,12 @@ describe('loadEnvironmentConfig', () => {
     expect(config.lambdaTimeout).toBe(30);
   });
 
-  test('loads prod environment config without subDomain', () => {
+  test('loads prod environment config without domainName', () => {
     const app = new cdk.App({
       context: {
         prod: {
           account: '987654321098',
           region: 'us-east-1',
-          domainName: 'example.com',
           lambdaMemorySize: 1024,
           lambdaTimeout: 60,
         },
@@ -44,6 +43,7 @@ describe('loadEnvironmentConfig', () => {
 
     expect(config.envName).toBe('prod');
     expect(config.account).toBe('987654321098');
+    expect(config.domainName).toBeUndefined();
     expect(config.subDomain).toBeUndefined();
     expect(config.lambdaMemorySize).toBe(1024);
     expect(config.lambdaTimeout).toBe(60);
@@ -62,13 +62,12 @@ describe('loadEnvironmentConfig', () => {
       context: {
         dev: {
           account: '123456789012',
-          // missing region, domainName, lambdaMemorySize, lambdaTimeout
         },
       },
     });
 
     expect(() => loadEnvironmentConfig(app, 'dev')).toThrow(
-      'Missing required configuration fields for "dev" environment: region, domainName, lambdaMemorySize, lambdaTimeout'
+      'Missing required configuration fields for "dev" environment: region, lambdaMemorySize, lambdaTimeout'
     );
   });
 });

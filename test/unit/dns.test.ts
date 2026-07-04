@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { Template, Match } from 'aws-cdk-lib/assertions';
+import { Template } from 'aws-cdk-lib/assertions';
 import { InfraStack } from '../../lib/infra-stack';
 import { EnvironmentConfig } from '../../lib/config';
 
@@ -7,8 +7,6 @@ const devConfig: EnvironmentConfig = {
   envName: 'dev',
   account: '123456789012',
   region: 'us-east-1',
-  domainName: 'example.com',
-  subDomain: 'dev',
   lambdaMemorySize: 512,
   lambdaTimeout: 30,
 };
@@ -17,12 +15,11 @@ const prodConfig: EnvironmentConfig = {
   envName: 'prod',
   account: '987654321098',
   region: 'us-east-1',
-  domainName: 'example.com',
   lambdaMemorySize: 1024,
   lambdaTimeout: 60,
 };
 
-describe('DNS and ACM Resources', () => {
+describe('CloudFront Distribution (no custom domain)', () => {
   describe('Dev environment', () => {
     let template: Template;
 
@@ -35,39 +32,24 @@ describe('DNS and ACM Resources', () => {
       template = Template.fromStack(stack);
     });
 
-    test('Route 53 hosted zone exists', () => {
-      template.resourceCountIs('AWS::Route53::HostedZone', 1);
-      template.hasResourceProperties('AWS::Route53::HostedZone', {
-        Name: 'example.com.',
-      });
+    test('CloudFront distribution exists', () => {
+      template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     });
 
-    test('A record alias points to CloudFront', () => {
-      template.hasResourceProperties('AWS::Route53::RecordSet', {
-        Type: 'A',
-        AliasTarget: Match.objectLike({
-          DNSName: Match.anyValue(),
-          HostedZoneId: Match.anyValue(),
-        }),
-      });
+    test('no custom domain names are configured', () => {
+      // Without a domain, CloudFront should not have Aliases
+      const resources = template.findResources('AWS::CloudFront::Distribution');
+      const distConfig = Object.values(resources)[0];
+      expect(distConfig.Properties.DistributionConfig.Aliases).toBeUndefined();
     });
 
-    test('ACM certificate uses DNS validation', () => {
-      template.hasResourceProperties('AWS::CertificateManager::Certificate', {
-        ValidationMethod: 'DNS',
-      });
+    test('no Route53 records exist (no domain)', () => {
+      template.resourceCountIs('AWS::Route53::HostedZone', 0);
+      template.resourceCountIs('AWS::Route53::RecordSet', 0);
     });
 
-    test('dev uses subdomain in DNS record', () => {
-      template.hasResourceProperties('AWS::Route53::RecordSet', {
-        Name: 'dev.example.com.',
-      });
-    });
-
-    test('dev ACM certificate uses subdomain', () => {
-      template.hasResourceProperties('AWS::CertificateManager::Certificate', {
-        DomainName: 'dev.example.com',
-      });
+    test('no ACM certificates exist (no domain)', () => {
+      template.resourceCountIs('AWS::CertificateManager::Certificate', 0);
     });
   });
 
@@ -83,17 +65,11 @@ describe('DNS and ACM Resources', () => {
       template = Template.fromStack(stack);
     });
 
-    test('prod uses apex domain in DNS record', () => {
-      template.hasResourceProperties('AWS::Route53::RecordSet', {
-        Name: 'example.com.',
-      });
-    });
-
-    test('prod ACM certificate uses apex domain with www SAN', () => {
-      template.hasResourceProperties('AWS::CertificateManager::Certificate', {
-        DomainName: 'example.com',
-        SubjectAlternativeNames: ['www.example.com'],
-      });
+    test('CloudFront distribution exists without custom domain', () => {
+      template.resourceCountIs('AWS::CloudFront::Distribution', 1);
+      const resources = template.findResources('AWS::CloudFront::Distribution');
+      const distConfig = Object.values(resources)[0];
+      expect(distConfig.Properties.DistributionConfig.Aliases).toBeUndefined();
     });
   });
 });

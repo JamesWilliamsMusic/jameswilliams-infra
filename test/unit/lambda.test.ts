@@ -7,8 +7,6 @@ const devConfig: EnvironmentConfig = {
   envName: 'dev',
   account: '123456789012',
   region: 'us-east-1',
-  domainName: 'example.com',
-  subDomain: 'dev',
   lambdaMemorySize: 512,
   lambdaTimeout: 30,
 };
@@ -49,13 +47,25 @@ describe('Lambda Function', () => {
         Statement: Match.arrayWith([
           Match.objectLike({
             Action: Match.arrayWith([
-              'ecr:BatchCheckLayerAvailability',
               'ecr:GetDownloadUrlForLayer',
               'ecr:BatchGetImage',
+              'ecr:GetAuthorizationToken',
             ]),
             Effect: 'Allow',
           }),
         ]),
+      },
+    });
+  });
+
+  test('Lambda has environment variables for Webiny', () => {
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: Match.objectLike({
+          NODE_ENV: 'development',
+          WEBINY_API_URL: '',
+          WEBINY_API_TOKEN: '',
+        }),
       },
     });
   });

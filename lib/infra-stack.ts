@@ -97,12 +97,6 @@ export class InfraStack extends cdk.Stack {
     this.httpApi = new apigw.HttpApi(this, 'HttpApi', {
       apiName: `${prefix}-api`,
       defaultIntegration: lambdaIntegration,
-      createDefaultStage: false,
-    });
-
-    this.httpApi.addStage('EnvironmentStage', {
-      stageName: config.envName,
-      autoDeploy: true,
     });
 
     // --- CloudFront Distribution (no custom domain for now) ---
@@ -110,9 +104,7 @@ export class InfraStack extends cdk.Stack {
 
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
-        origin: new origins.HttpOrigin(apiEndpointDomain, {
-          originPath: `/${config.envName}`,
-        }),
+        origin: new origins.HttpOrigin(apiEndpointDomain),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
@@ -149,7 +141,7 @@ export class InfraStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'ApiGatewayUrl', {
-      value: `https://${apiEndpointDomain}/${config.envName}`,
+      value: `https://${apiEndpointDomain}`,
       description: 'API Gateway endpoint URL',
     });
 

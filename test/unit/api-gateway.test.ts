@@ -46,9 +46,9 @@ describe('API Gateway HTTP API', () => {
     });
   });
 
-  test('per-environment stage is configured', () => {
+  test('default stage is configured with auto deploy', () => {
     template.hasResourceProperties('AWS::ApiGatewayV2::Stage', {
-      StageName: 'dev',
+      StageName: '$default',
       AutoDeploy: true,
     });
   });

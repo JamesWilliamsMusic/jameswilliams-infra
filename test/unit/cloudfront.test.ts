@@ -35,7 +35,7 @@ describe('CloudFront Distribution', () => {
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
   });
 
-  test('API Gateway is configured as origin with env stage path', () => {
+  test('API Gateway is configured as origin without path prefix', () => {
     template.hasResourceProperties('AWS::CloudFront::Distribution', {
       DistributionConfig: {
         Origins: [
@@ -43,7 +43,6 @@ describe('CloudFront Distribution', () => {
             CustomOriginConfig: {
               OriginProtocolPolicy: 'https-only',
             },
-            OriginPath: '/dev',
           }),
         ],
       },
@@ -56,6 +55,8 @@ describe('CloudFront Distribution', () => {
     const domainParts = origin.DomainName['Fn::Join'][1];
     const domainSuffix = domainParts[1] as string;
     expect(domainSuffix).toContain('.execute-api.');
+    // No origin path — routes go to root
+    expect(origin.OriginPath).toBeUndefined();
   });
 
   test('uses default CloudFront domain (no custom domain or certificate)', () => {
@@ -78,15 +79,10 @@ describe('CloudFront Distribution (prod)', () => {
     template = Template.fromStack(stack);
   });
 
-  test('prod uses /prod origin path', () => {
-    template.hasResourceProperties('AWS::CloudFront::Distribution', {
-      DistributionConfig: {
-        Origins: [
-          Match.objectLike({
-            OriginPath: '/prod',
-          }),
-        ],
-      },
-    });
+  test('prod origin has no path prefix', () => {
+    const resources = template.findResources('AWS::CloudFront::Distribution');
+    const distConfig = Object.values(resources)[0];
+    const origin = distConfig.Properties.DistributionConfig.Origins[0];
+    expect(origin.OriginPath).toBeUndefined();
   });
 });

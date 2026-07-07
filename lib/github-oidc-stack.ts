@@ -117,6 +117,16 @@ export class GitHubOidcStack extends cdk.Stack {
       ],
     }));
 
+    webRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'secretsmanager:GetSecretValue',
+      ],
+      resources: [
+        `arn:aws:secretsmanager:${this.region}:${this.account}:secret:jameswilliams/*`,
+      ],
+    }));
+
     new cdk.CfnOutput(this, 'WebRoleArn', {
       value: webRole.roleArn,
       description: 'Add this as AWS_ROLE_ARN in jameswilliams-web GitHub repo secrets',

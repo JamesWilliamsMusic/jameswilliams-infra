@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
 export interface SsmParamsStackProps extends cdk.StackProps {
@@ -9,16 +10,17 @@ export interface SsmParamsStackProps extends cdk.StackProps {
 }
 
 /**
- * Stores shared configuration in SSM Parameter Store.
- * Services (Lambda, CI) read these at runtime or build time.
+ * Stores shared configuration:
+ *   - SSM Parameter Store for non-sensitive config (API URL)
+ *   - Secrets Manager for sensitive values (API token)
  *
- * Parameter paths:
- *   /jameswilliams/{env}/webiny/api-url
- *   /jameswilliams/{env}/webiny/api-token  (SecureString)
+ * Paths:
+ *   SSM:     /jameswilliams/{env}/webiny/api-url
+ *   Secret:  jameswilliams/{env}/webiny/api-token
  */
 export class SsmParamsStack extends cdk.Stack {
   public readonly webinyApiUrlParam: ssm.StringParameter;
-  public readonly webinyApiTokenParam: ssm.StringParameter;
+  public readonly webinyApiTokenSecret: secretsmanager.Secret;
 
   constructor(scope: Construct, id: string, props: SsmParamsStackProps) {
     super(scope, id, props);
@@ -26,7 +28,7 @@ export class SsmParamsStack extends cdk.Stack {
     const { envName, webinyApiUrl, webinyApiToken } = props;
     const prefix = `/jameswilliams/${envName}`;
 
-    // Webiny API URL (plain string — not secret)
+    // Webiny API URL (plain string in SSM — not sensitive)
     this.webinyApiUrlParam = new ssm.StringParameter(this, 'WebinyApiUrl', {
       parameterName: `${prefix}/webiny/api-url`,
       stringValue: webinyApiUrl,
@@ -34,13 +36,11 @@ export class SsmParamsStack extends cdk.Stack {
       tier: ssm.ParameterTier.STANDARD,
     });
 
-    // Webiny API Token (stored as regular string in SSM — use Secrets Manager
-    // if you need automatic rotation, but SSM is fine for static API tokens)
-    this.webinyApiTokenParam = new ssm.StringParameter(this, 'WebinyApiToken', {
-      parameterName: `${prefix}/webiny/api-token`,
-      stringValue: webinyApiToken,
+    // Webiny API Token (in Secrets Manager — encrypted, auditable)
+    this.webinyApiTokenSecret = new secretsmanager.Secret(this, 'WebinyApiToken', {
+      secretName: `jameswilliams/${envName}/webiny/api-token`,
       description: `Webiny CMS API token for ${envName}`,
-      tier: ssm.ParameterTier.STANDARD,
+      secretStringValue: cdk.SecretValue.unsafePlainText(webinyApiToken),
     });
 
     // Outputs
@@ -49,9 +49,9 @@ export class SsmParamsStack extends cdk.Stack {
       description: 'SSM parameter name for Webiny API URL',
     });
 
-    new cdk.CfnOutput(this, 'WebinyApiTokenParamName', {
-      value: this.webinyApiTokenParam.parameterName,
-      description: 'SSM parameter name for Webiny API token',
+    new cdk.CfnOutput(this, 'WebinyApiTokenSecretArn', {
+      value: this.webinyApiTokenSecret.secretArn,
+      description: 'Secrets Manager ARN for Webiny API token',
     });
   }
 }

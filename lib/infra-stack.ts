@@ -7,6 +7,7 @@ import * as apigwIntegrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as path from 'path';
 import { Construct } from 'constructs';
 import { EnvironmentConfig } from './config';
@@ -113,6 +114,34 @@ export class InfraStack extends cdk.Stack {
       comment: `${prefix} distribution`,
     });
 
+    // --- Fan Accounts Lambda Environment Variables ---
+    // Values sourced from FanAccountsStack SSM parameters (resolved at deploy time)
+    const cognitoUserPoolId = ssm.StringParameter.valueForStringParameter(
+      this, `/jameswilliams/${config.envName}/cognito/user-pool-id`
+    );
+    const cognitoClientId = ssm.StringParameter.valueForStringParameter(
+      this, `/jameswilliams/${config.envName}/cognito/client-id`
+    );
+    const fanPreferencesTable = ssm.StringParameter.valueForStringParameter(
+      this, `/jameswilliams/${config.envName}/dynamodb/fan-preferences-table`
+    );
+    const fanDeletionAuditTable = ssm.StringParameter.valueForStringParameter(
+      this, `/jameswilliams/${config.envName}/dynamodb/fan-deletion-audit-table`
+    );
+    const kmsKeyArn = ssm.StringParameter.valueForStringParameter(
+      this, `/jameswilliams/${config.envName}/kms/fan-data-key-arn`
+    );
+
+    this.lambdaFunction.addEnvironment('COGNITO_USER_POOL_ID', cognitoUserPoolId);
+    this.lambdaFunction.addEnvironment('COGNITO_CLIENT_ID', cognitoClientId);
+    this.lambdaFunction.addEnvironment('COGNITO_REGION', 'ap-southeast-2');
+    this.lambdaFunction.addEnvironment('FAN_PREFERENCES_TABLE', fanPreferencesTable);
+    this.lambdaFunction.addEnvironment('FAN_DELETION_AUDIT_TABLE', fanDeletionAuditTable);
+    this.lambdaFunction.addEnvironment('KMS_KEY_ARN', kmsKeyArn);
+    this.lambdaFunction.addEnvironment('COOKIE_DOMAIN', this.distribution.distributionDomainName);
+    this.lambdaFunction.addEnvironment('COOKIE_SECURE', 'true');
+    this.lambdaFunction.addEnvironment('NEXT_PUBLIC_APP_URL', `https://${this.distribution.distributionDomainName}`);
+
     // --- Cognito User Pool ---
     this.userPool = new cognito.UserPool(this, 'UserPool', {
       userPoolName: `${prefix}-users`,
@@ -153,6 +182,11 @@ export class InfraStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'EcrRepositoryUri', {
       value: this.repository.repositoryUri,
       description: 'ECR repository URI (use in web app CI)',
+    });
+
+    new cdk.CfnOutput(this, 'LambdaRoleArn', {
+      value: lambdaRole.roleArn,
+      exportName: `${prefix}-lambda-role-arn`,
     });
   }
 }

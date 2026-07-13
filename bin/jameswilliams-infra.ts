@@ -5,6 +5,7 @@ import { GitHubOidcStack } from '../lib/github-oidc-stack';
 import { EcrStack } from '../lib/ecr-stack';
 import { WebinyDeployRoleStack } from '../lib/webiny-deploy-role-stack';
 import { SsmParamsStack } from '../lib/ssm-params-stack';
+import { FanAccountsStack } from '../lib/fan-accounts-stack';
 import { loadEnvironmentConfig } from '../lib/config';
 
 const app = new cdk.App();
@@ -78,6 +79,13 @@ if (envName === 'dev' || envName === 'prod') {
   new InfraStack(app, `${config.envName}-music-portfolio`, {
     env: { account: config.account, region: config.region },
     config,
+  });
+
+  new FanAccountsStack(app, `${envName}-fan-accounts`, {
+    env: { account: ACCOUNT, region: REGION },
+    envName,
+    lambdaFunctionName: `${envName}-music-portfolio-fn`,
+    cloudFrontDomain: 'd1nfcqgwk0mjlu.cloudfront.net',
   });
 }
 

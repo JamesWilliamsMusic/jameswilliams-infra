@@ -85,8 +85,19 @@ export class InfraStack extends cdk.Stack {
         NODE_ENV: config.envName === 'prod' ? 'production' : 'development',
         WEBINY_API_URL: '',
         WEBINY_API_TOKEN: '',
+        SES_FROM_EMAIL: 'jameswilliamsmusic@gmail.com',
+        CONTACT_RECIPIENT_EMAIL: 'jameswilliamsmusic@gmail.com',
       },
     });
+
+    // Allow Lambda to send emails via SES
+    lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['ses:SendEmail'],
+      resources: [
+        `arn:aws:ses:${this.region}:${this.account}:identity/jameswilliamsmusic@gmail.com`,
+      ],
+    }));
 
     // --- API Gateway HTTP API ---
     const lambdaIntegration = new apigwIntegrations.HttpLambdaIntegration(

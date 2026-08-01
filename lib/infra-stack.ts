@@ -6,6 +6,7 @@ import * as apigw from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigwIntegrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as path from 'path';
 import { Construct } from 'constructs';
@@ -13,6 +14,7 @@ import { EnvironmentConfig } from './config';
 
 export interface InfraStackProps extends cdk.StackProps {
   config: EnvironmentConfig;
+  certificate?: acm.ICertificate;
 }
 
 export class InfraStack extends cdk.Stack {
@@ -85,16 +87,19 @@ export class InfraStack extends cdk.Stack {
         NODE_ENV: config.envName === 'prod' ? 'production' : 'development',
         WEBINY_API_URL: '',
         WEBINY_API_TOKEN: '',
-        SES_FROM_EMAIL: 'jameswilliamsmusic@gmail.com',
+        SES_FROM_EMAIL: config.domainName
+          ? `noreply@${config.domainName}`
+          : 'jameswilliamsmusic@gmail.com',
         CONTACT_RECIPIENT_EMAIL: 'jameswilliamsmusic@gmail.com',
       },
     });
 
-    // Allow Lambda to send emails via SES
+    // Allow Lambda to send emails via SES (domain identity + gmail fallback)
     lambdaRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      actions: ['ses:SendEmail'],
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
       resources: [
+        `arn:aws:ses:${this.region}:${this.account}:identity/jameswilliamsmusic.store`,
         `arn:aws:ses:${this.region}:${this.account}:identity/jameswilliamsmusic@gmail.com`,
       ],
     }));
@@ -110,8 +115,19 @@ export class InfraStack extends cdk.Stack {
       defaultIntegration: lambdaIntegration,
     });
 
-    // --- CloudFront Distribution (no custom domain for now) ---
+    // --- CloudFront Distribution ---
     const apiEndpointDomain = `${this.httpApi.httpApiId}.execute-api.${this.region}.amazonaws.com`;
+
+    // Custom domain names (only when domainName is configured and certificate is provided)
+    let domainNames: string[] | undefined;
+
+    if (config.domainName && props.certificate) {
+      domainNames = [config.domainName];
+      // Only add www for prod
+      if (config.envName === 'prod') {
+        domainNames.push(`www.${config.domainName}`);
+      }
+    }
 
     this.distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
@@ -122,6 +138,8 @@ export class InfraStack extends cdk.Stack {
         originRequestPolicy: cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       },
       comment: `${prefix} distribution`,
+      ...(props.certificate && { certificate: props.certificate }),
+      ...(domainNames && { domainNames }),
     });
 
     // --- Cognito User Pool ---
@@ -170,5 +188,12 @@ export class InfraStack extends cdk.Stack {
       value: lambdaRole.roleArn,
       exportName: `${prefix}-lambda-role-arn`,
     });
+
+    if (config.domainName && props.certificate) {
+      new cdk.CfnOutput(this, 'CustomDomain', {
+        value: config.domainName,
+        description: 'Custom domain name configured on CloudFront',
+      });
+    }
   }
 }

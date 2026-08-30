@@ -6,21 +6,72 @@ Provisions cloud resources for a containerized application with environment sepa
 
 ## Architecture
 
+The CDK app (`bin/jameswilliams-infra.ts`) synthesizes several independent CloudFormation stacks. Some are shared across environments and deployed once, while the application infrastructure is deployed per-environment (dev/prod) selected via `--context env=`.
+
+### Stack Map
+
 ```
-CloudFront Distribution (CDN + HTTPS)
-        │
-        ▼
-API Gateway (HTTP API)
-        │
-        ▼
-Lambda Function (Docker image from ECR)
+                        CDK App (bin/jameswilliams-infra.ts)
+                                        │
+      ┌──────────────────┬─────────────┼──────────────┬────────────────────┐
+      │ shared / once    │             │              │                    │ per-env (dev|prod)
+      ▼                  ▼             ▼              ▼                    ▼
+ GitHubOidcBootstrap  EcrRepositories  WebinyDeployRole-*  SsmParams-*   {env}-music-portfolio
+ (OIDC provider +     (web + api ECR   (Pulumi/Webiny      (SSM params + (application stack)
+  deploy/web roles)    repos)           deploy IAM role)    secrets)              │
+                                                                                  │
+        SesDomain (SES identity + DKIM via Route 53)              {env}-cert (ACM, us-east-1) ─┐
+                                                                                  │            │ certificate
+                                                                  {env}-fan-accounts           │ ref
+                                                                  (fan Cognito/DynamoDB/KMS)   │
+                                                                                               ▼
 ```
 
-Supporting services:
+### Application Request Flow (`{env}-music-portfolio`)
 
-- **Route 53** — DNS hosted zone and alias records pointing to CloudFront
-- **ACM** — SSL/TLS certificate (us-east-1) with DNS validation via Route 53
-- **Cognito** — User pool for authentication with password policy enforcement
+```
+              Route 53 (jameswilliamsmusic.com hosted zone)
+                                  │  DNS
+                                  ▼
+        ACM cert (us-east-1) ─▶ CloudFront Distribution (CDN + HTTPS, custom domain)
+                                  │  origin (HTTPS, caching disabled)
+                                  ▼
+                        API Gateway (HTTP API)
+                                  │  Lambda proxy integration
+                                  ▼
+             Lambda (Docker image from ECR, placeholder → real app via CI)
+              │                    │                       │
+              ▼                    ▼                       ▼
+        SES (send email)   SSM / Secrets Manager    Cognito + DynamoDB + KMS
+                           (Webiny + reCAPTCHA)      (fan accounts stack)
+```
+
+### Fan Accounts Stack (`{env}-fan-accounts`)
+
+```
+  Cognito User Pool (fan auth) ──┐
+  DynamoDB fan-preferences (GSI: email-index) ──┤ encrypted by
+  DynamoDB fan-deletion-audit (TTL: expiresAt) ─┘  KMS customer-managed key
+                        │
+                        ▼
+  CloudWatch Alarms (Cognito throttles, DynamoDB throttles, Lambda errors) ─▶ SNS ops topic
+                        │
+                        ▼
+  SSM params (/jameswilliams/{env}/...) for resource discovery by the app Lambda
+```
+
+### Stacks
+
+| Stack | Scope | Purpose |
+|-------|-------|---------|
+| `GitHubOidcBootstrap` | shared (once) | GitHub OIDC provider + IAM roles: `github-actions-deploy` (Admin, CDK deploys) and `github-actions-jameswilliams-web` (ECR push, Lambda update, SSM/Secrets read, CloudFront invalidation) |
+| `EcrRepositories` | shared (once) | ECR repos for `jameswilliams-web` and `jameswilliams-api` (retain, scan on push, 10 most recent) |
+| `WebinyDeployRole-Dev` / `-Prod` | shared (once) | Broad IAM deploy role for Webiny CMS (Pulumi) — S3, DynamoDB, Lambda, API Gateway, CloudFront, Cognito, OpenSearch, Step Functions, WAF, etc. |
+| `SsmParams-Dev` / `-Prod` | shared (once) | SSM parameters (Webiny API URL, reCAPTCHA site key) + Secrets Manager (Webiny API token, reCAPTCHA secret) |
+| `SesDomain` | shared (once) | SES domain identity + DKIM + MAIL FROM for `jameswilliamsmusic.com`, DNS managed via Route 53 |
+| `{env}-cert` | per-env | ACM certificate in `us-east-1` for CloudFront (DNS validation) |
+| `{env}-music-portfolio` | per-env | Application: ECR, Lambda (Docker), API Gateway HTTP API, CloudFront, Cognito user pool |
+| `{env}-fan-accounts` | per-env | Fan auth (Cognito), preferences + deletion-audit DynamoDB tables, KMS key, CloudWatch alarms + SNS, discovery SSM params |
 
 ### AWS Services
 
@@ -28,20 +79,30 @@ Supporting services:
 |---------|---------|
 | CloudFront | CDN with HTTPS termination and custom domain |
 | API Gateway | HTTP API routing all requests to Lambda |
-| Lambda | Runs the application as a Docker container |
+| Lambda | Runs the application as a Docker container image |
 | ECR | Stores Docker container images (retains 10 most recent) |
-| Route 53 | DNS hosted zone and alias records |
-| ACM | TLS certificate with DNS validation |
-| Cognito | User authentication (min 8 char password policy) |
+| Route 53 | DNS hosted zone (SES DKIM/MAIL FROM records) |
+| ACM | TLS certificate (us-east-1) with DNS validation |
+| Cognito | App user pool + fan-account user pool |
+| DynamoDB | Fan preferences (GSI on email) and deletion-audit (TTL) tables |
+| KMS | Customer-managed key encrypting fan PII in DynamoDB |
+| SES | Domain-verified email sending (contact form) |
+| SSM Parameter Store | Non-sensitive shared config + resource discovery |
+| Secrets Manager | Sensitive values (Webiny token, reCAPTCHA secret) |
+| CloudWatch / SNS | Alarms on throttles/errors routed to an ops topic |
+| IAM / OIDC | GitHub Actions federation and scoped deploy roles |
 
 ### Resource Naming
 
 Resources use an environment prefix to avoid collisions:
 
-- ECR: `{env}-music-portfolio`
+- ECR (app): `{env}-music-portfolio`
 - Lambda: `{env}-music-portfolio-fn`
 - API Gateway: `{env}-music-portfolio-api`
-- Cognito: `{env}-music-portfolio-users`
+- Cognito (app): `{env}-music-portfolio-users`
+- Fan preferences table: `{env}-jameswilliams-fan-preferences`
+- Fan deletion-audit table: `{env}-jameswilliams-fan-deletion-audit`
+- SSM discovery params: `/jameswilliams/{env}/...`
 
 ## Prerequisites
 
@@ -153,13 +214,21 @@ npx jest test/property
 ## Project Structure
 
 ```
-bin/app.ts              CDK app entry point
-lib/config.ts           Environment configuration interface and loader
-lib/infra-stack.ts      Infrastructure stack (all AWS resources)
-.github/workflows/      CI/CD workflows (dev + prod)
-test/unit/              Unit tests (CDK assertions)
-test/property/          Property-based tests (fast-check)
-cdk.json                CDK app config and environment context
+bin/jameswilliams-infra.ts   CDK app entry point (wires up all stacks)
+lib/config.ts                Environment configuration interface and loader
+lib/infra-stack.ts           Application stack (ECR, Lambda, API GW, CloudFront, Cognito)
+lib/certificate-stack.ts     ACM certificate stack (us-east-1)
+lib/github-oidc-stack.ts     GitHub OIDC provider + deploy/web IAM roles
+lib/ecr-stack.ts             Shared ECR repositories (web + api)
+lib/webiny-deploy-role-stack.ts  IAM role for Webiny CMS deployment
+lib/ssm-params-stack.ts      SSM params + Secrets Manager for shared config
+lib/ses-domain-stack.ts      SES domain identity + DKIM
+lib/fan-accounts-stack.ts    Fan Cognito/DynamoDB/KMS + alarms
+lib/constructs/              Reusable constructs (fan-kms, fan-cognito, fan-dynamodb)
+.github/workflows/           CI/CD workflows (dev + prod)
+test/unit/                   Unit tests (CDK assertions)
+test/property/               Property-based tests (fast-check)
+cdk.json                     CDK app config and environment context
 ```
 
 ## Microservice Architecture

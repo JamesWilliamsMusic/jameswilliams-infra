@@ -100,7 +100,9 @@ export class GitHubOidcStack extends cdk.Stack {
       effect: iam.Effect.ALLOW,
       actions: [
         'lambda:UpdateFunctionCode',
+        'lambda:UpdateFunctionConfiguration',
         'lambda:GetFunction',
+        'lambda:GetFunctionConfiguration',
       ],
       resources: ['*'],
     }));
@@ -124,6 +126,16 @@ export class GitHubOidcStack extends cdk.Stack {
       ],
       resources: [
         `arn:aws:secretsmanager:${this.region}:${this.account}:secret:jameswilliams/*`,
+      ],
+    }));
+
+    webRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'cloudfront:CreateInvalidation',
+      ],
+      resources: [
+        `arn:aws:cloudfront::${this.account}:distribution/*`,
       ],
     }));
 

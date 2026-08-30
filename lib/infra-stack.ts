@@ -94,13 +94,12 @@ export class InfraStack extends cdk.Stack {
       },
     });
 
-    // Allow Lambda to send emails via SES (domain identity + gmail fallback)
+    // Allow Lambda to send emails via SES (scoped to the configured domain identity)
     lambdaRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ['ses:SendEmail', 'ses:SendRawEmail'],
       resources: [
-        `arn:aws:ses:${this.region}:${this.account}:identity/jameswilliamsmusic.store`,
-        `arn:aws:ses:${this.region}:${this.account}:identity/jameswilliamsmusic@gmail.com`,
+        `arn:aws:ses:${this.region}:${this.account}:identity/jameswilliamsmusic.com`,
       ],
     }));
 

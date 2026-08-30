@@ -78,8 +78,8 @@ new SsmParamsStack(app, 'SsmParams-Prod', {
 // ──────────────────────────────────────────────────────────────
 new SesDomainStack(app, 'SesDomain', {
   env: { account: ACCOUNT, region: REGION },
-  domainName: 'jameswilliamsmusic.store',
-  hostedZoneId: 'Z012204411K3MGAHA7WEM',
+  domainName: 'jameswilliamsmusic.com',
+  hostedZoneId: 'Z0707417X1MX9LVEEQHS',
 });
 
 // ──────────────────────────────────────────────────────────────
@@ -90,14 +90,14 @@ const envName = app.node.tryGetContext('env') as string | undefined;
 if (envName === 'dev' || envName === 'prod') {
   const config = loadEnvironmentConfig(app, envName);
 
-  // Certificate stack in us-east-1 (required by CloudFront) — only for prod with domain
+  // Certificate stack in us-east-1 (required by CloudFront)
   let certificate;
   if (config.domainName) {
     const subjectAlternativeNames = envName === 'prod'
       ? [`www.${config.domainName}`]
       : undefined;
 
-    const certStack = new CertificateStack(app, `${config.envName}-certificate`, {
+    const certStack = new CertificateStack(app, `${config.envName}-cert`, {
       env: { account: config.account, region: 'us-east-1' },
       domainName: config.domainName,
       subjectAlternativeNames,

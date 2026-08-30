@@ -10,54 +10,79 @@ The CDK app (`bin/jameswilliams-infra.ts`) synthesizes several independent Cloud
 
 ### Stack Map
 
-```
-                        CDK App (bin/jameswilliams-infra.ts)
-                                        │
-      ┌──────────────────┬─────────────┼──────────────┬────────────────────┐
-      │ shared / once    │             │              │                    │ per-env (dev|prod)
-      ▼                  ▼             ▼              ▼                    ▼
- GitHubOidcBootstrap  EcrRepositories  WebinyDeployRole-*  SsmParams-*   {env}-music-portfolio
- (OIDC provider +     (web + api ECR   (Pulumi/Webiny      (SSM params + (application stack)
-  deploy/web roles)    repos)           deploy IAM role)    secrets)              │
-                                                                                  │
-        SesDomain (SES identity + DKIM via Route 53)              {env}-cert (ACM, us-east-1) ─┐
-                                                                                  │            │ certificate
-                                                                  {env}-fan-accounts           │ ref
-                                                                  (fan Cognito/DynamoDB/KMS)   │
-                                                                                               ▼
+```mermaid
+graph TD
+    APP["CDK App<br/>bin/jameswilliams-infra.ts"]
+
+    subgraph shared["Shared stacks (deployed once)"]
+        OIDC["GitHubOidcBootstrap<br/>OIDC provider + deploy/web roles"]
+        ECR["EcrRepositories<br/>web + api ECR repos"]
+        WEBINY["WebinyDeployRole-Dev / -Prod<br/>Pulumi/Webiny deploy IAM role"]
+        SSM["SsmParams-Dev / -Prod<br/>SSM params + secrets"]
+        SES["SesDomain<br/>SES identity + DKIM via Route 53"]
+    end
+
+    subgraph perenv["Per-environment stacks (dev | prod)"]
+        CERT["{env}-cert<br/>ACM, us-east-1"]
+        INFRA["{env}-music-portfolio<br/>application stack"]
+        FAN["{env}-fan-accounts<br/>fan Cognito / DynamoDB / KMS"]
+    end
+
+    APP --> OIDC
+    APP --> ECR
+    APP --> WEBINY
+    APP --> SSM
+    APP --> SES
+    APP --> CERT
+    APP --> INFRA
+    APP --> FAN
+
+    CERT -. certificate ref .-> INFRA
+    INFRA -. lambda role export .-> FAN
 ```
 
 ### Application Request Flow (`{env}-music-portfolio`)
 
-```
-              Route 53 (jameswilliamsmusic.com hosted zone)
-                                  │  DNS
-                                  ▼
-        ACM cert (us-east-1) ─▶ CloudFront Distribution (CDN + HTTPS, custom domain)
-                                  │  origin (HTTPS, caching disabled)
-                                  ▼
-                        API Gateway (HTTP API)
-                                  │  Lambda proxy integration
-                                  ▼
-             Lambda (Docker image from ECR, placeholder → real app via CI)
-              │                    │                       │
-              ▼                    ▼                       ▼
-        SES (send email)   SSM / Secrets Manager    Cognito + DynamoDB + KMS
-                           (Webiny + reCAPTCHA)      (fan accounts stack)
+```mermaid
+graph TD
+    R53["Route 53<br/>jameswilliamsmusic.com hosted zone"]
+    ACM["ACM certificate<br/>us-east-1"]
+    CF["CloudFront Distribution<br/>CDN + HTTPS, custom domain"]
+    APIGW["API Gateway<br/>HTTP API"]
+    LAMBDA["Lambda<br/>Docker image from ECR<br/>placeholder → real app via CI"]
+    SES["SES<br/>send email"]
+    CONFIG["SSM / Secrets Manager<br/>Webiny + reCAPTCHA"]
+    FAN["Cognito + DynamoDB + KMS<br/>fan accounts stack"]
+
+    R53 -->|DNS| CF
+    ACM -.->|TLS cert| CF
+    CF -->|origin, HTTPS, caching disabled| APIGW
+    APIGW -->|Lambda proxy integration| LAMBDA
+    LAMBDA --> SES
+    LAMBDA --> CONFIG
+    LAMBDA --> FAN
 ```
 
 ### Fan Accounts Stack (`{env}-fan-accounts`)
 
-```
-  Cognito User Pool (fan auth) ──┐
-  DynamoDB fan-preferences (GSI: email-index) ──┤ encrypted by
-  DynamoDB fan-deletion-audit (TTL: expiresAt) ─┘  KMS customer-managed key
-                        │
-                        ▼
-  CloudWatch Alarms (Cognito throttles, DynamoDB throttles, Lambda errors) ─▶ SNS ops topic
-                        │
-                        ▼
-  SSM params (/jameswilliams/{env}/...) for resource discovery by the app Lambda
+```mermaid
+graph TD
+    COGNITO["Cognito User Pool<br/>fan auth"]
+    PREFS["DynamoDB fan-preferences<br/>GSI: email-index"]
+    AUDIT["DynamoDB fan-deletion-audit<br/>TTL: expiresAt"]
+    KMS["KMS customer-managed key"]
+    ALARMS["CloudWatch Alarms<br/>Cognito throttles, DynamoDB throttles, Lambda errors"]
+    SNS["SNS ops topic"]
+    SSM["SSM params<br/>/jameswilliams/{env}/..."]
+
+    KMS -->|encrypts| PREFS
+    KMS -->|encrypts| AUDIT
+    COGNITO -.->|metrics| ALARMS
+    PREFS -.->|metrics| ALARMS
+    ALARMS -->|notify| SNS
+    COGNITO -->|IDs published to| SSM
+    PREFS -->|table names published to| SSM
+    AUDIT -->|table names published to| SSM
 ```
 
 ### Stacks
